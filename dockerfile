@@ -1,5 +1,5 @@
 # Utilisation de Node.js 18
-FROM node:18
+FROM node:18-alpine
 
 # Définition du répertoire de travail
 WORKDIR /app
@@ -8,14 +8,15 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-# Ajout du chemin pour s'assurer que `react-scripts` est trouvé
-ENV PATH /app/node_modules/.bin:$PATH
-
 # Copie du reste des fichiers
 COPY . .
+
+RUN npm run build
+
+RUN npm install -g serve
 
 # Exposition du port 3000
 EXPOSE 3000
 
 # Commande de démarrage
-CMD ["npm", "start"]
+CMD ["serve", "-s", "build", "-l", "3000"]
