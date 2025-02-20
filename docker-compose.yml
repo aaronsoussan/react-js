@@ -1,0 +1,49 @@
+name: Deploy to AWS VPS with Docker
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install OpenSSH client
+        run: sudo apt-get install -y openssh-client
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy to AWS VPS
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd ${{ secrets.WORK_DIR }}
+            git pull origin ${{ secrets.MAIN_BRANCH }}
+            docker-compose down
+            docker system prune -af
+            echo "version: '3.8'" > docker-compose.yml
+            echo "services:" >> docker-compose.yml
+            echo "  app:" >> docker-compose.yml
+            echo "    build: ." >> docker-compose.yml
+            echo "    ports:" >> docker-compose.yml
+            echo "      - \"3000:3000\"" >> docker-compose.yml
+            echo "    volumes:" >> docker-compose.yml
+            echo "      - .:/app" >> docker-compose.yml
+            echo "    environment:" >> docker-compose.yml
+            echo "      - NODE_ENV=production" >> docker-compose.yml
+            echo "    depends_on:" >> docker-compose.yml
+            echo "      - db" >> docker-compose.yml
+            docker-compose up --build -d
+          EOF
+
+      - name: Cleanup SSH key
+        run: rm -rf ~/.ssh
