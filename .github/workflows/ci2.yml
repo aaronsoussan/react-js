@@ -31,4 +31,4 @@ jobs:
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git pull origin ${{ secrets.MAIN_BRANCH }}"
 
       - name: Cleanup SSH key
-        run: rm -rf ~/.ssh
+        run: rm -rf ~/.ssh   

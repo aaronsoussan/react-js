@@ -10,7 +10,7 @@
 #     runs-on: ubuntu-latest
     
 #     steps:
-#       # Étape 1 : Cloner le code
+#       # Étape 1 : Cloner le code 
 #       - name: Checkout code
 #         uses: actions/checkout@v3
         
