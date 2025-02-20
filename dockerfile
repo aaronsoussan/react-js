@@ -1,19 +1,20 @@
-# Utilisation d'une image de base (ex: Node.js si c'est une app Node, Python si c'est une app Django/Flask)
+# Utilisation de Node.js 18
 FROM node:18
 
-# Définition du répertoire de travail dans le conteneur
+# Définition du répertoire de travail
 WORKDIR /app
 
-# Copie des fichiers de l'application
+# Copie des fichiers package.json et installation des dépendances
 COPY package*.json ./
-
-# Installation des dépendances
 RUN npm install
+
+# Ajout du chemin pour s'assurer que `react-scripts` est trouvé
+ENV PATH /app/node_modules/.bin:$PATH
 
 # Copie du reste des fichiers
 COPY . .
 
-# Exposition du port de l'application
+# Exposition du port 3000
 EXPOSE 3000
 
 # Commande de démarrage
