@@ -35,4 +35,4 @@ jobs:
 
       - name: Cleanup SSH key
         run: rm -rf ~/.ssh
-        run: rm -rf ~/.ssh   
+
