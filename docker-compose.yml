@@ -21,8 +21,8 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "letsencrypt:/letsencrypt"
     networks:
-      traefik_network
-      
+      - traefik_network
+
   app:
     build: .
     restart: always
@@ -35,7 +35,7 @@ services:
     depends_on:
       - traefik
     networks:
-      traefik_network
+      - traefik_network
 
 volumes:
   letsencrypt:
