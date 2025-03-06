@@ -1,36 +1,33 @@
-version: "3.8"
+version: '3'
 
 services:
   traefik:
     image: traefik:v2.10
     restart: always
     command:
-      - "--api.dashboard=true"
-      - "--api.insecure=false" # Désactive le mode non sécurisé
+      - "--api.insecure=true" # Interface de Traefik (à désactiver en prod)
       - "--providers.docker=true"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.myresolver.acme.email=ton-email@example.com"  # Remplace par ton adresse email
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=ton-nathan.serror@gmail.com" # Remplace par ton email
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080" # Dashboard Traefik
+      - "8080:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "letsencrypt:/letsencrypt"
+      - "./letsencrypt:/letsencrypt" # Stockage des certificats
 
-  app:
+  react-app:
     build: .
     restart: always
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.app.rule=Host(`aaron.soudry-ort.online`)"  # Remplace par ton domaine
-      - "traefik.http.routers.app.entrypoints=websecure"
-      - "traefik.http.routers.app.tls.certresolver=myresolver"
-    depends_on:
-      - traefik
-
-volumes:
-  letsencrypt:
+      - "traefik.http.routers.react-app.rule=Host(nathan.soudry-ort.online)"
+      - "traefik.http.routers.react-app.entrypoints=websecure"
+      - "traefik.http.routers.react-app.tls.certresolver=myresolver"
+      - "traefik.http.services.react-app.loadbalancer.server.port=3000"
